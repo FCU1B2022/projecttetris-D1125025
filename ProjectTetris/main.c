@@ -269,7 +269,7 @@ bool move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], int originalX, int original
     Shape shapeData = shapes[shapeId];
     int size = shapeData.size;
 
-    // check if the new position is valid to place the block
+    // check if the new position is valid to place the block yeah
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             if (shapeData.rotates[newRotate][i][j]) {
