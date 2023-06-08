@@ -424,7 +424,7 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
         Sleep(20);
     }
 
-    if (state->score % 5 == 0 && state->score != 0) {
+    if (state->score % 4 == 0 && state->score != 0) {
         FALL_DELAY -= 1;
     }
 
@@ -448,8 +448,7 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
             state->queue[2] = state->queue[3];
             state->queue[3] = rand() % 7;
 
-            if (!move(canvas, state->x, state->y, state->rotate, state->x, state->y, state->rotate, state->queue[0]))
-            {
+            if (!move(canvas, state->x, state->y, state->rotate, state->x, state->y, state->rotate, state->queue[0])){
                 system("cls");
                 printf("\n\n\n");
                 printf("\x1b[31;5m ,----.                                 ,-----.                        \n");
@@ -460,7 +459,6 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
                 printf("\n\n\n");
                 printf("\t\t\tYour score: %d\n\n\n\n", state->score);
 
-                //printf("\033[%d;%dH\x1b[41m GAME OVER \x1b[0m\033[%d;%dH", CANVAS_HEIGHT - 3, CANVAS_WIDTH * 2 + 5, CANVAS_HEIGHT + 5, 0);
                 exit(0);
             }
         }
