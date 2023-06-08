@@ -10,8 +10,9 @@
 #define DOWN_KEY 0x28     // The key to move down, default = 0x28 (down arrow)
 #define FALL_KEY 0x20     // The key to fall, default = 0x20 (spacebar)
 
-#define FALL_DELAY 500    // The delay between each fall, default = 500
 #define RENDER_DELAY 100  // The delay between each frame, default = 100
+#define AC_BLUE "\x1b[38;5;153m"
+#define AC_NORMAL "\x1b[m"
 
 #define LEFT_FUNC() GetAsyncKeyState(LEFT_KEY) & 0x8000
 #define RIGHT_FUNC() GetAsyncKeyState(RIGHT_KEY) & 0x8000
@@ -21,6 +22,8 @@
 
 #define CANVAS_WIDTH 10
 #define CANVAS_HEIGHT 20
+
+int FALL_DELAY;    // The delay between each fall, default = 500
 
 typedef enum {
     RED = 41,
@@ -323,15 +326,15 @@ void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
 {
     printf("\033[0;0H\n");
     for (int i = 0; i < CANVAS_HEIGHT; i++) {
-        printf("|");
+        printf("%s(|",AC_BLUE);
         for (int j = 0; j < CANVAS_WIDTH; j++) {
             printf("\033[%dm\u3000", canvas[i][j].color);
         }
-        printf("\033[0m|\n");
+        printf("\033[0m%s|)%s\n",AC_BLUE,AC_NORMAL);
     }
 
     Shape shapeData = shapes[state->queue[1]];
-    printf("\033[%d;%dHNext:", 3, CANVAS_WIDTH * 2 + 5);
+    printf("\033[%d;%dH Next:", 3, CANVAS_WIDTH * 2 + 5);
     for (int i = 1; i <= 3; i++)
     {
         shapeData = shapes[state->queue[i]];
@@ -347,6 +350,7 @@ void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
             }
         }
     }
+    printf("\n\t\t\t Score: %d",state->score);
     return;
 }
 
@@ -417,6 +421,11 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
     }
     else if (FALL_FUNC()) {
         state->fallTime += FALL_DELAY * CANVAS_HEIGHT;
+        Sleep(20);
+    }
+
+    if (state->score % 5 == 0 && state->score != 0) {
+        FALL_DELAY -= 1;
     }
 
     state->fallTime += RENDER_DELAY;
@@ -441,7 +450,17 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
 
             if (!move(canvas, state->x, state->y, state->rotate, state->x, state->y, state->rotate, state->queue[0]))
             {
-                printf("\033[%d;%dH\x1b[41m GAME OVER \x1b[0m\033[%d;%dH", CANVAS_HEIGHT - 3, CANVAS_WIDTH * 2 + 5, CANVAS_HEIGHT + 5, 0);
+                system("cls");
+                printf("\n\n\n");
+                printf("\x1b[31;5m ,----.                                 ,-----.                        \n");
+                printf("'  .-./    ,--,--.,--,--,--. ,---.     '  .-.  ',--.  ,--.,---. ,--.--.\n");
+                printf("|  | .---.' ,-.  ||        || .-. :    |  | |  | \\  `'  /| .-. :|  .--' \n");
+                printf("'  '--'  |\\ '-'  ||  |  |  |\\   --.    '  '-'  '  \\    / \\   --.|  |    \n");
+                printf(" `------'  `--`--'`--`--`--' `----'     `-----'    `--'   `----'`--'    \033[m\n");
+                printf("\n\n\n");
+                printf("\t\t\tYour score: %d\n\n\n\n", state->score);
+
+                //printf("\033[%d;%dH\x1b[41m GAME OVER \x1b[0m\033[%d;%dH", CANVAS_HEIGHT - 3, CANVAS_WIDTH * 2 + 5, CANVAS_HEIGHT + 5, 0);
                 exit(0);
             }
         }
@@ -449,8 +468,64 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
     return;
 }
 
+void hideCursor()
+{
+    CONSOLE_CURSOR_INFO cursor;
+    cursor.bVisible = false;
+    cursor.dwSize = sizeof(cursor);
+    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleCursorInfo(handle, &cursor);
+}
+
 int main()
 {
+    hideCursor();
+    int startKey = 0,chooseMode = 0;
+    while (1) {
+        system("cls");
+
+        printf("%s,--------.        ,--.         ,--.        \n",AC_BLUE);
+        printf("'--.  .--',---. ,-'  '-.,--.--.`--' ,---.  \n");
+        printf("   |  |  | .-. :'-.  .-'|  .--',--.(  .-'  \n");
+        printf("   |  |  \\   --.  |  |  |  |   |  |.-'  `) \n");
+        printf("   `--'   `----'  `--'  `--'   `--'`----'  %s\n",AC_NORMAL);
+
+        printf("\n\n\n\t\t請輸入: \n\t\t\t1 進入遊戲\n\t\t\t2 調整難度 ");
+        scanf_s("%d", &startKey);
+        if (startKey == 1) {
+            FALL_DELAY = 500;
+            break;
+        }
+        if (startKey == 2) {
+            system("cls");
+            printf("%s,--------.        ,--.         ,--.        \n", AC_BLUE);
+            printf("'--.  .--',---. ,-'  '-.,--.--.`--' ,---.  \n");
+            printf("   |  |  | .-. :'-.  .-'|  .--',--.(  .-'  \n");
+            printf("   |  |  \\   --.  |  |  |  |   |  |.-'  `) \n");
+            printf("   `--'   `----'  `--'  `--'   `--'`----'  %s\n", AC_NORMAL);
+            printf("\n\n\n\t\t請輸入:\n\t\t\t1 簡單\n\t\t\t2 困難 ");
+            scanf_s("%d", &chooseMode);
+            if (chooseMode == 1) {
+                FALL_DELAY = 500;
+                break;
+            }
+            if (chooseMode == 2) {
+                FALL_DELAY = 420;
+                break;
+            }
+            else {
+                system("cls");
+                printf("輸入錯誤");
+                Sleep(1000);
+            }
+        }
+        else {
+            system("cls");
+            printf("輸入錯誤");
+            Sleep(1000);
+        }
+
+    }
     srand(time(NULL));
     State state = {
         .x = CANVAS_WIDTH / 2,
